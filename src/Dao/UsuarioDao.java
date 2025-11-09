@@ -15,157 +15,193 @@ import java.sql.SQLException;
  */
 public class UsuarioDao {
 
-    public Usuario validarUsuario(String usuario, String contrasena) {
-        // Traemos también el id_rol para construir el objeto Rol completo
-        String sql = "SELECT u.id_usuario, u.nombre_usuario, r.id_rol, r.nombre_rol "
+    public Usuario validarUsuario(String nombreUsuario, String contrasena) {
+        final String sql
+                = "SELECT u.id_usuario, u.nombre_usuario, u.contrasena, "
+                + "       u.id_rol, r.nombre_rol, u.id_persona "
                 + "FROM usuarios u "
-                + "JOIN roles r ON u.id_rol = r.id_rol "
+                + "JOIN roles r ON r.id_rol = u.id_rol "
                 + "WHERE u.nombre_usuario = ? AND u.contrasena = ?";
 
-        Usuario user = null;
+        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-        try (Connection conn = Conexion.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ps.setString(1, nombreUsuario);
+            ps.setString(2, contrasena);
 
-            pstmt.setString(1, usuario);
-            pstmt.setString(2, contrasena);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    // 1. Creamos el objeto Rol con sus datos
-                    Rol rolUsuario = new Rol();
-                    rolUsuario.setIdRol(rs.getInt("id_rol"));
-                    rolUsuario.setNombreRol(rs.getString("nombre_rol"));
+                    Rol rol = new Rol();
+                    rol.setIdRol(rs.getInt("id_rol"));
+                    rol.setNombreRol(rs.getString("nombre_rol"));
 
-                    // 2. Creamos el objeto Usuario
-                    user = new Usuario();
-                    user.setId(rs.getInt("id_usuario"));
-                    user.setNombreUsuario(rs.getString("nombre_usuario"));
-
-                    // 3. Asignamos el objeto Rol completo al Usuario
-                    user.setRol(rolUsuario);
+                    Usuario u = new Usuario();
+                    u.setId(rs.getInt("id_usuario"));
+                    u.setNombreUsuario(rs.getString("nombre_usuario"));
+                    u.setRol(rol);
+                    // u.setIdPersona(rs.getInt("id_persona")); 
+                    return u;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al validar usuario: " + e.getMessage());
+            System.err.println("validarUsuario: " + e.getMessage());
         }
-        return user;
+        return null;
     }
 
-    /**
-     * Verifica si un correo electrónico ya existe en la base de datos. Lo usa
-     * 'RecuperarContrasenaControlador'.
-     *
-     * @param correo El email a verificar.
-     * @return true si el email existe, false en caso contrario.
-     */
     public boolean verificarEmailExiste(String correo) {
-
-        // Ajusta 'usuarios' y 'email' si tu tabla o columna se llaman diferente
-        String sql = "SELECT COUNT(1) FROM usuarios WHERE email = ?";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, correo);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    // Si el conteo (rs.getInt(1)) es mayor a 0, el email existe
-                    return rs.getInt(1) > 0;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al verificar email: " + e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * Verifica si el código de recuperación coincide con el del email. Lo usa
-     * 'IngresarCodigoControlador'.
-     *
-     * @param correo El email del usuario.
-     * @param codigo El código de 6 dígitos ingresado.
-     * @return true si el código es correcto, false en caso contrario.
-     */
-    public boolean verificarCodigo(String correo, String codigo) {
-
-        // Asume que tienes una columna 'codigo_recuperacion'
-        // Ajusta los nombres si es necesario
-        String sql = "SELECT COUNT(1) FROM usuarios WHERE email = ? AND codigo_recuperacion = ?";
+        final String sql
+                = "SELECT COUNT(1) "
+                + "FROM personas p "
+                + "JOIN usuarios u ON u.id_persona = p.id_persona "
+                + "WHERE p.correo_electronico = ?";
 
         try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, correo);
-            ps.setString(2, codigo);
-
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    // Si el conteo es > 0, el email Y el código coinciden
-                    return rs.getInt(1) > 0;
-                }
+                return rs.next() && rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            System.err.println("Error al verificar código: " + e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * Actualiza la contraseña del usuario en la base de datos y limpia el
-     * código. Lo usa 'ActualizarContrasenaControlador'.
-     *
-     * @param correo El email del usuario a actualizar.
-     * @param nuevaPass La nueva contraseña (¡idealmente encriptada!).
-     * @return true si la actualización fue exitosa, false en caso contrario.
-     */
-    public boolean actualizarContraseña(String correo, String nuevaPass) {
-
-        // Esta consulta también pone el 'codigo_recuperacion' en NULL
-        // para que no se pueda volver a usar.
-        String sql = "UPDATE usuarios SET contrasena = ?, codigo_recuperacion = NULL WHERE email = ?";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            // 🔒 IMPORTANTE: Aquí deberías encriptar 'nuevaPass' antes de guardarla
-            ps.setString(1, nuevaPass);
-            ps.setString(2, correo);
-
-            // executeUpdate() devuelve el número de filas afectadas
-            int filasAfectadas = ps.executeUpdate();
-
-            // Si se afectó 1 fila, la actualización fue exitosa
-            return filasAfectadas > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error al actualizar contraseña: " + e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * Guarda el código de recuperación temporal en la base de datos.
-     *
-     * @param correo El email del usuario.
-     * @param codigo El código de 6 dígitos generado.
-     * @return true si se guardó con éxito, false si no.
-     */
-    public boolean guardarCodigoTemporal(String correo, String codigo) {
-
-        // Asume que tu columna se llama 'codigo_recuperacion'
-        String sql = "UPDATE usuarios SET codigo_recuperacion = ? WHERE email = ?";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, codigo);
-            ps.setString(2, correo);
-
-            int filasAfectadas = ps.executeUpdate();
-            return filasAfectadas > 0; // true si se actualizó 1 fila
-
-        } catch (SQLException e) {
-            System.err.println("Error al guardar código temporal: " + e.getMessage());
+            System.err.println("verificarEmailExiste: " + e.getMessage());
             return false;
         }
     }
 
+    public boolean guardarCodigoTemporal(String correo, String codigo6) {
+        if (codigo6 == null || !codigo6.matches("\\d{6}")) {
+            return false;
+        }
+
+        final String sqlFindUser
+                = "SELECT u.id_usuario "
+                + "FROM usuarios u "
+                + "JOIN personas p ON p.id_persona = u.id_persona "
+                + "WHERE p.correo_electronico = ?";
+
+        final String sqlInsertToken
+                = "INSERT INTO tokens_recuperacion (id_usuario, token, fecha_expiracion, usado) "
+                + "VALUES (?, ?, NOW() + INTERVAL '10 minutes', FALSE)";
+
+        try (Connection con = Conexion.getConnection()) {
+            Integer idUsuario = null;
+
+            try (PreparedStatement ps = con.prepareStatement(sqlFindUser)) {
+                ps.setString(1, correo);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        idUsuario = rs.getInt(1);
+                    }
+                }
+            }
+            if (idUsuario == null) {
+                System.err.println("guardarCodigoTemporal: no existe usuario para " + correo);
+                return false;
+            }
+
+            try (PreparedStatement ps = con.prepareStatement(sqlInsertToken)) {
+                ps.setInt(1, idUsuario);
+                ps.setString(2, codigo6);
+                return ps.executeUpdate() > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("guardarCodigoTemporal: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean verificarCodigo(String correo, String codigo6) {
+        if (codigo6 == null || !codigo6.matches("\\d{6}")) {
+            return false;
+        }
+
+        final String sqlSelectValid
+                = "SELECT t.id_token "
+                + "FROM tokens_recuperacion t "
+                + "JOIN usuarios u ON u.id_usuario = t.id_usuario "
+                + "JOIN personas p ON p.id_persona = u.id_persona "
+                + "WHERE p.correo_electronico = ? "
+                + "  AND t.token = ? "
+                + "  AND t.usado = FALSE "
+                + "  AND t.fecha_expiracion > NOW() "
+                + "ORDER BY t.id_token DESC "
+                + "LIMIT 1";
+
+        final String sqlMarkUsed
+                = "UPDATE tokens_recuperacion SET usado = TRUE WHERE id_token = ?";
+
+        try (Connection con = Conexion.getConnection(); PreparedStatement psSel = con.prepareStatement(sqlSelectValid)) {
+
+            psSel.setString(1, correo);
+            psSel.setString(2, codigo6);
+
+            Integer idToken = null;
+            try (ResultSet rs = psSel.executeQuery()) {
+                if (rs.next()) {
+                    idToken = rs.getInt(1);
+                }
+            }
+            if (idToken == null) {
+                return false;
+            }
+
+            try (PreparedStatement psUpd = con.prepareStatement(sqlMarkUsed)) {
+                psUpd.setInt(1, idToken);
+                psUpd.executeUpdate();
+            }
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("verificarCodigo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean actualizarContraseña(String correo, String nuevaPass) {
+        final String sqlUpdatePass
+                = "UPDATE usuarios SET contrasena = ? "
+                + "WHERE id_persona = (SELECT id_persona FROM personas WHERE correo_electronico = ?)";
+
+        final String sqlDeleteTokens
+                = "DELETE FROM tokens_recuperacion "
+                + "WHERE id_usuario = ("
+                + "  SELECT u.id_usuario FROM usuarios u "
+                + "  JOIN personas p ON p.id_persona = u.id_persona "
+                + "  WHERE p.correo_electronico = ?"
+                + ")";
+
+        try (Connection con = Conexion.getConnection()) {
+
+            try (PreparedStatement ps = con.prepareStatement(sqlUpdatePass)) {
+                ps.setString(1, nuevaPass);
+                ps.setString(2, correo);
+                if (ps.executeUpdate() == 0) {
+                    return false;
+                }
+            }
+            try (PreparedStatement ps = con.prepareStatement(sqlDeleteTokens)) {
+                ps.setString(1, correo);
+                ps.executeUpdate();
+            }
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("actualizarContraseña: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private Integer findUserIdByCorreo(Connection con, String correo) throws SQLException {
+        final String sql
+                = "SELECT u.id_usuario "
+                + "FROM usuarios u "
+                + "JOIN personas p ON p.id_persona = u.id_persona "
+                + "WHERE p.correo_electronico = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, correo);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : null;
+            }
+        }
+    }
 }

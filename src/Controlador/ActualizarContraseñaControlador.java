@@ -2,39 +2,37 @@ package Controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
-import Vista.ActualizarContraseña; // Tu vista
+import Vista.ActualizarContraseña;
 import Vista.Login;
 import Dao.UsuarioDao;
+import Utilidades.NotificadorUtils;
+import Utilidades.ValidadorUtils;
 
 /**
  *
  * @author Michael Ramos;
-*
- */
+ *
+**/
+
 public class ActualizarContraseñaControlador implements ActionListener {
 
     private final ActualizarContraseña vista;
     private final UsuarioDao modeloDao;
-    private final String correoDelUsuario; // Correo del usuario a actualizar
+    private final String correoDelUsuario;
+    
+    private final String NUEVA_PASS_PLACEHOLDER = "Escriba la nueva contraseña";
+    private final String CONFIRMAR_PASS_PLACEHOLDER = "Confirme la contraseña";
 
-    /**
-     * Constructor.
-     *
-     * @param vista La vista que va a controlar (ActualizarContrasena.java)
-     * @param correo El email del usuario (viene de IngresarCodigoControlador)
-     * @param dao El DAO para actualizar la BD
-     */
+
     public ActualizarContraseñaControlador(ActualizarContraseña vista, String correo, UsuarioDao dao) {
         this.vista = vista;
         this.correoDelUsuario = correo;
         this.modeloDao = dao;
 
-        // Registrar el listener del botón
         this.vista.btnGuardar.addActionListener(this);
-
-        // (Asegúrate de tener estos labels en tu vista)
+        this.vista.pfNuevaContrasena.addActionListener(this);
+        this.vista.pfConfirmarContrasena.addActionListener(this);
         this.vista.lblError.setText("");
         this.vista.lbSpinner.setVisible(false);
     }
@@ -47,37 +45,46 @@ public class ActualizarContraseñaControlador implements ActionListener {
     }
 
     private void iniciarActualizacion() {
-        // 1. Limpiar errores anteriores
+
         vista.lblError.setText("");
 
-        // 2. Obtener las contraseñas (¡recuerda usar .getPassword()!)
+
         String pass1 = new String(vista.pfNuevaContrasena.getPassword());
         String pass2 = new String(vista.pfConfirmarContrasena.getPassword());
 
-        // 3. --- VALIDACIONES ---
-        if (pass1.isEmpty() || pass2.isEmpty()) {
-            vista.lblError.setText("Los campos no pueden estar vacíos.");
+        if (ValidadorUtils.esCampoVacio(vista.pfNuevaContrasena, NUEVA_PASS_PLACEHOLDER)) {
+            NotificadorUtils.mostrarError("El campo 'Nueva Contraseña' está vacío.");
+            return; 
+        }
+
+        if (ValidadorUtils.esCampoVacio(vista.pfConfirmarContrasena, CONFIRMAR_PASS_PLACEHOLDER)) {
+            NotificadorUtils.mostrarError("El campo 'Confirmar Contraseña' está vacío.");
             return;
         }
 
-        if (!pass1.equals(pass2)) {
-            vista.lblError.setText("Las contraseñas no coinciden.");
+        if (!ValidadorUtils.contrasenasCoinciden(vista.pfNuevaContrasena, vista.pfConfirmarContrasena)) {
+            NotificadorUtils.mostrarError("Las contraseñas no coinciden. Verifíquelas.");
             return;
         }
 
-        // 4. --- INICIAR SWINGWORKER ---
-        prepararUI(true); // Mostrar spinner
+        if (!ValidadorUtils.esContrasenaSegura(pass1)) {
+            NotificadorUtils.mostrarError(
+                    "La contraseña no es segura. Debe tener:\n"
+                    + "- Al menos 8 caracteres\n"
+                    + "- Una mayúscula y una minúscula\n"
+                    + "- Un número\n"
+                    + "- Un símbolo (@#$%^&+=!)"
+            );
+            return;
+        }
+
+
+        prepararUI(true);
 
         SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                // --- LÓGICA REAL ---
 
-// 1. (IMPORTANTE) Encripta la contraseña antes de guardarla
-// String passEncriptada = Encriptador.hashPassword(pass1);
-// 2. Llama al DAO para actualizar
-// return modeloDao.actualizarContrasena(correoDelUsuario, passEncriptada);
-// (Por ahora, usa la versión sin encriptar si aún no lo tienes)
                 return modeloDao.actualizarContraseña(correoDelUsuario, pass1);
             }
 
@@ -87,15 +94,14 @@ public class ActualizarContraseñaControlador implements ActionListener {
                 try {
                     resultadoExitoso = get();
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(vista, "Error al actualizar.", "Error de BD", JOptionPane.ERROR_MESSAGE);
+                    NotificadorUtils.mostrarError("Error al actualizar.");
                 } finally {
-                    prepararUI(false); // Ocultar spinner
+                    prepararUI(false); 
                 }
 
                 if (resultadoExitoso) {
-                    JOptionPane.showMessageDialog(vista, "¡Contraseña actualizada con éxito!", "Proceso Completado", JOptionPane.INFORMATION_MESSAGE);
+                    NotificadorUtils.mostrarExito("¡Contraseña actualizada con éxito!");
 
-                    // 7. Cierra esta ventana y vuelve al Login
                     vista.dispose();
 
                     Login loginView = new Login();

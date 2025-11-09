@@ -1,11 +1,11 @@
-
-
 package Modelo;
 
 /**
  *
  * @author Michael Ramos;
-**/
+ *
+ *
+ */
 public class Rol {
 
     private int idRol;
