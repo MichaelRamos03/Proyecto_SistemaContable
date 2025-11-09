@@ -1,11 +1,11 @@
-
-
 package Modelo;
 
 /**
  *
  * @author Michael Ramos;
-**/
+ *
+ *
+ */
 public class Usuario {
 
     private int id;

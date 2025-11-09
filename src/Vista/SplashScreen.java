@@ -9,21 +9,23 @@ import javax.swing.Timer;
 /**
  *
  * @author Michael Ramos;
+ *
+ *
  */
 public class SplashScreen extends javax.swing.JFrame {
-    
-    private final int FADE_STEP = 30; // Milisegundos entre cada paso del fade
-    private final float OPACITY_INCREMENT = 0.05f; // Cuánto aumenta/disminuye la opacidad en cada paso
+
+    private final int FADE_STEP = 30;
+    private final float OPACITY_INCREMENT = 0.05f;
 
     public SplashScreen() {
         initComponents();
-        
+
         jpbBarraDeprogreso.setIndeterminate(true);
         jpbBarraDeprogreso.setStringPainted(false);
-        
-        this.setLocationRelativeTo(null); // Centra la ventana
-        this.setOpacity(0.0f); // ¡Inicia completamente transparente!
-        
+
+        this.setLocationRelativeTo(null);
+        this.setOpacity(0.0f);
+
         try {
             Image icon = new ImageIcon(getClass().getResource("/Imagenes/ahorrar-dinero.png")).getImage();
             this.setIconImage(icon);
@@ -31,63 +33,47 @@ public class SplashScreen extends javax.swing.JFrame {
             System.out.println("No se pudo cargar el icono de la aplicación");
         }
     }
-    
-    // --- Métodos para el Fade ---
 
     public void fadeIn() {
-        // Muestra la ventana (sigue transparente)
-        this.setVisible(true); 
-        
+
+        this.setVisible(true);
+
         Timer fadeInTimer = new Timer(FADE_STEP, new ActionListener() {
-            private float opacity = 0.0f; // Empieza desde la transparencia total
+            private float opacity = 0.0f;
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 opacity += OPACITY_INCREMENT;
                 if (opacity >= 1.0f) {
                     opacity = 1.0f;
-                    ((Timer) e.getSource()).stop(); // Detiene el temporizador cuando es opaco
+                    ((Timer) e.getSource()).stop();
                 }
                 setOpacity(opacity);
             }
         });
-        fadeInTimer.start(); // Inicia el fade-in
+        fadeInTimer.start();
     }
 
     public void fadeOut(ActionListener onComplete) {
         Timer fadeOutTimer = new Timer(FADE_STEP, new ActionListener() {
-            private float opacity = 1.0f; // Empieza desde la opacidad total
+            private float opacity = 1.0f;
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 opacity -= OPACITY_INCREMENT;
                 if (opacity <= 0.0f) {
                     opacity = 0.0f;
-                    ((Timer) e.getSource()).stop(); // Detiene el temporizador
-                    dispose(); // Cierra la ventana del splash
+                    ((Timer) e.getSource()).stop();
+                    dispose();
                     if (onComplete != null) {
-                        onComplete.actionPerformed(null); // Ejecuta la acción de "completado"
+                        onComplete.actionPerformed(null);
                     }
                 }
                 setOpacity(opacity);
             }
         });
-        fadeOutTimer.start(); // Inicia el fade-out
+        fadeOutTimer.start();
     }
-
-    // ... (El resto de tu código initComponents() y variables) ...
-
-//    public static void main(String args[]) {
-//        // Ejemplo de cómo se vería el splash si lo ejecutas directamente
-//        // Es útil para probar solo el splash
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                SplashScreen s = new SplashScreen();
-//                s.fadeIn(); // Inicia el fade-in
-//                // Puedes simular un tiempo y luego el fade-out
-//            }
-//        });
-//    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

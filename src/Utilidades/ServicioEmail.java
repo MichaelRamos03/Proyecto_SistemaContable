@@ -17,20 +17,12 @@ import java.util.Random;
  */
 public class ServicioEmail {
 
-    // --- ¡IMPORTANTE! ---/***********************************
+
     // El correo desde el que se enviarán los mensajes
     private static final String CORREO_REMITENTE = "botcontable2025@gmail.com";
-    // La CONTRASEÑA DE APLICACIÓN de 16 dígitos que generaste
+    // La CONTRASEÑA DE APLICACIÓN de 16 dígitos
     private static final String CONTRASENA_APP = "uyuugdbbmrobzckg";
 
-    /**
-     * Envía un correo electrónico a través de los servidores SMTP de Gmail.
-     *
-     * @param destinatario El correo del usuario que recibirá el mensaje.
-     * @param asunto El asunto del correo.
-     * @param cuerpo El contenido (mensaje) del correo.
-     * @return true si se envió con éxito, false si hubo un error.
-     */
     public boolean enviarCorreo(String destinatario, String asunto, String cuerpo) {
 
         // 1. Configuración de las propiedades del servidor SMTP de Gmail

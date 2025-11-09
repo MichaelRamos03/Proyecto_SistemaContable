@@ -32,8 +32,7 @@ public class SesionUsuario {
         // En las llamadas siguientes, simplemente devuelve el objeto que ya se creó.
         return instancia;
     }
-
-    // Métodos normales para guardar y obtener el usuario
+    
     public Usuario getUsuarioLogueado() {
         return usuarioLogueado;
     }

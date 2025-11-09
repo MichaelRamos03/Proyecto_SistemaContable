@@ -16,31 +16,36 @@ import javax.swing.text.DocumentFilter;
 /**
  *
  * @author Michael Ramos;
+ *
+ *
  */
 public class IngresarCodigo extends javax.swing.JFrame {
 
     public IngresarCodigo() {
         initComponents();
         this.setLocationRelativeTo(this);
+
+        txtCodigo1.setOpaque(false);
+        txtCodigo2.setOpaque(false);
+        txtCodigo3.setOpaque(false);
+        txtCodigo4.setOpaque(false);
+        txtCodigo5.setOpaque(false);
+        txtCodigo6.setOpaque(false);
+
         setIconImage(new ImageIcon(getClass().getResource("/Imagenes/ahorrar-dinero.png")).getImage());
 
-        // --- INICIO DE LÓGICA DE 6 CAJAS ---
-// 1. Agrupa todos tus JTextField en un array para manejarlos fácil
         JTextField[] campos = {txtCodigo1, txtCodigo2, txtCodigo3, txtCodigo4, txtCodigo5, txtCodigo6};
 
-// 2. Itera sobre cada campo para añadir la lógica
         for (int i = 0; i < campos.length; i++) {
             JTextField campoActual = campos[i];
             int indiceActual = i;
 
-            // A. Limita cada campo a 1 SOLO CARÁCTER y que sea NÚMERO
             ((AbstractDocument) campoActual.getDocument()).setDocumentFilter(new DocumentFilter() {
                 @Override
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                     if (string == null) {
                         return;
                     }
-                    // Acepta solo 1 dígito
                     if ((fb.getDocument().getLength() + string.length()) <= 1 && string.matches("\\d")) {
                         super.insertString(fb, offset, string, attr);
                     }
@@ -51,63 +56,47 @@ public class IngresarCodigo extends javax.swing.JFrame {
                     if (text == null) {
                         return;
                     }
-                    // Acepta solo 1 dígito al reemplazar
                     if ((fb.getDocument().getLength() + text.length() - length) <= 1 && text.matches("\\d")) {
                         super.replace(fb, offset, length, text, attrs);
                     }
                 }
             });
 
-            // B. Añade el "Key Listener" para AUTO-TAB, BORRADO y PEGADO
             campoActual.addKeyListener(new KeyAdapter() {
 
-                // --- Lógica de Auto-Tab y Borrado ---
                 @Override
                 public void keyReleased(KeyEvent e) {
                     String texto = campoActual.getText();
-
-                    // CASO 1: Si se escribió un dígito y la caja está llena
                     if (texto.length() == 1 && e.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
-                        // Mueve el foco al SIGUIENTE campo (si no es el último)
                         if (indiceActual < campos.length - 1) {
                             campos[indiceActual + 1].requestFocusInWindow();
                         }
                     }
 
-                    // CASO 2: Si se presionó BORRAR (Backspace) y la caja está vacía
                     if (texto.isEmpty() && e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                        // Mueve el foco al campo ANTERIOR (si no es el primero)
                         if (indiceActual > 0) {
                             campos[indiceActual - 1].requestFocusInWindow();
                         }
                     }
                 }
 
-                // --- Lógica de Pegado (CTRL+V) ---
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    // Detecta si el usuario presionó CTRL+V (Pegar)
-                    // Solo lo procesamos en la PRIMERA caja para evitar líos
-                    if (indiceActual == 0 && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
-                        e.consume(); // Consume el evento para que no pegue todo en la caja 1
 
+                    if (indiceActual == 0 && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
+                        e.consume();
                         try {
-                            // Obtiene el texto del portapapeles
                             Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
                             String data = (String) c.getData(DataFlavor.stringFlavor);
 
-                            // Limpia y valida el texto (quita espacios, etc.)
-                            String codigo = data.trim().replaceAll("[^\\d]", ""); // Solo números
+                            String codigo = data.trim().replaceAll("[^\\d]", "");
 
-                            // Si es un código de 6 dígitos, lo distribuye
                             if (codigo.length() == 6) {
                                 for (int j = 0; j < campos.length; j++) {
                                     campos[j].setText(String.valueOf(codigo.charAt(j)));
                                 }
-                                // Mueve el foco al final
                                 campos[5].requestFocusInWindow();
                             } else if (codigo.length() > 0) {
-                                // Si pegó algo que no son 6 dígitos, solo pega el primero
                                 campoActual.setText(String.valueOf(codigo.charAt(0)));
                             }
 
@@ -118,53 +107,33 @@ public class IngresarCodigo extends javax.swing.JFrame {
                 }
             });
         }
-// --- FIN DE LÓGICA DE 6 CAJAS ---
 
         String rutaSpinner = "/Imagenes/spinner.gif";
         try {
-            // Carga la imagen original
             ImageIcon originalIcon = new ImageIcon(getClass().getResource(rutaSpinner));
-
-            // Define el tamaño deseado (ej. 32x32)
             int anchoDeseado = 90;
             int altoDeseado = 90;
-
-            // Obtiene la imagen y la escala
-            // Usamos Image.SCALE_DEFAULT para que respete la animación del GIF
             Image scaledImage = originalIcon.getImage().getScaledInstance(
                     anchoDeseado, altoDeseado, Image.SCALE_DEFAULT
             );
-
-            // Crea un nuevo ImageIcon con la imagen escalada
             ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-            // Asigna el icono escalado (y ahora pequeño) al JLabel
             lbSpinner.setIcon(scaledIcon);
-            lbSpinner.setVisible(false); // Sigue oculto por defecto
+            lbSpinner.setVisible(false);
 
         } catch (Exception ex) {
             System.err.println("Error al cargar o redimensionar el spinner: " + ex.getMessage());
             lbSpinner.setVisible(false);
         }
     }
-    
-    /**
-     * Método público para que el Controlador obtenga el código completo.
-     * @return El código de 6 dígitos (o un string incompleto).
-     */
-    public String getCodigoIngresado() {
-        // Asegúrate que los nombres (txtCodigo1, txtCodigo2, etc.)
-        // coincidan con los de tu diseñador.
-        return txtCodigo1.getText() +
-               txtCodigo2.getText() +
-               txtCodigo3.getText() +
-               txtCodigo4.getText() +
-               txtCodigo5.getText() +
-               txtCodigo6.getText();
-    }
 
-// ... aquí van tus variables autogeneradas (txtCodigo1, etc.)...
-// } <-- Este es el último '}' de la clase
+    public String getCodigoIngresado() {
+        return txtCodigo1.getText()
+                + txtCodigo2.getText()
+                + txtCodigo3.getText()
+                + txtCodigo4.getText()
+                + txtCodigo5.getText()
+                + txtCodigo6.getText();
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -172,6 +141,7 @@ public class IngresarCodigo extends javax.swing.JFrame {
 
         Fondo = new javax.swing.JPanel();
         FondoCodigo = new javax.swing.JPanel();
+        lbSpinner = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         txtCodigo1 = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
@@ -184,7 +154,6 @@ public class IngresarCodigo extends javax.swing.JFrame {
         txtCodigo5 = new javax.swing.JTextField();
         jSeparator6 = new javax.swing.JSeparator();
         txtCodigo6 = new javax.swing.JTextField();
-        lbSpinner = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         btnSiguiente = new javax.swing.JButton();
         lblTimer = new javax.swing.JLabel();
@@ -196,6 +165,9 @@ public class IngresarCodigo extends javax.swing.JFrame {
 
         FondoCodigo.setBackground(new java.awt.Color(255, 255, 255));
         FondoCodigo.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lbSpinner.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/spinner.gif"))); // NOI18N
+        FondoCodigo.add(lbSpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, -10, -1, -1));
 
         jSeparator1.setBackground(new java.awt.Color(0, 0, 0));
         jSeparator1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -263,9 +235,6 @@ public class IngresarCodigo extends javax.swing.JFrame {
         txtCodigo6.setPreferredSize(new java.awt.Dimension(40, 40));
         FondoCodigo.add(txtCodigo6, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 80, 50, 50));
 
-        lbSpinner.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/spinner.gif"))); // NOI18N
-        FondoCodigo.add(lbSpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, -10, -1, -1));
-
         jLabel2.setFont(new java.awt.Font("Roboto Black", 1, 24)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("INGRESE CODIGO DE VERIFICACIÓN");
@@ -309,8 +278,8 @@ public class IngresarCodigo extends javax.swing.JFrame {
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 428, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(177, 177, 177))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FondoLayout.createSequentialGroup()
-                        .addComponent(btnReenviar)
-                        .addGap(145, 145, 145))))
+                        .addComponent(btnReenviar, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(133, 133, 133))))
         );
         FondoLayout.setVerticalGroup(
             FondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -345,40 +314,37 @@ public class IngresarCodigo extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new IngresarCodigo().setVisible(true);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(IngresarCodigo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new IngresarCodigo().setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Fondo;

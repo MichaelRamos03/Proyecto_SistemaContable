@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package Vista;
 
 import java.awt.Color;
@@ -13,13 +9,17 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 
 /**
  *
  * @author Michael Ramos;
+ *
+ *
  */
 public class Login extends javax.swing.JFrame {
+
+    public static final String PLACEHOLDER_USUARIO = "Ingrese su usuario";
+    public static final String PLACEHOLDER_PASSWORD = "* * * * * * * *";
 
     int xMause, yMause;
     private boolean passwordVisible = false;
@@ -37,40 +37,9 @@ public class Login extends javax.swing.JFrame {
         //this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         Bg.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204), 1));
 
-        // --- ESTADO INICIAL DE PLACEHOLDERS ---
-        tfUsuario.setText("Ingrese su usuario");
-        tfUsuario.setForeground(Color.GRAY);
-        tfContraseña.setText("* * * * * * * *");
-        tfContraseña.setForeground(Color.GRAY);
+        Utilidades.PlaceholderTextFieldListener userListener = new Utilidades.PlaceholderTextFieldListener(tfUsuario, PLACEHOLDER_USUARIO);
+        Utilidades.PlaceholderDocumentListener passListener = new Utilidades.PlaceholderDocumentListener(tfContraseña, PLACEHOLDER_PASSWORD, '*');
 
-        // --- 1. LISTENER DE FOCO PARA USUARIO (CON ANIMACIÓN) ---
-        tfUsuario.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (tfUsuario.getText().equals("Ingrese su usuario")) {
-                    tfUsuario.setText("");
-                    tfUsuario.setForeground(Color.BLACK);
-                }
-                // ¡CORRECCIÓN! Añade la animación al separador 1
-                // jSeparator1.setForeground(new Color(153, 0, 255));
-                // En el focusLost de tfUsuario
-                jSeparator1.setForeground(new Color(80, 80, 80)); // Un gris oscuro en lugar de claro
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (tfUsuario.getText().isEmpty()) {
-                    tfUsuario.setText("Ingrese su usuario");
-                    tfUsuario.setForeground(Color.GRAY);
-                }
-                // ¡CORRECCIÓN! Devuelve el color al separador 1
-                //jSeparator1.setForeground(new Color(204, 204, 204));
-                // En el focusLost de tfUsuario
-                jSeparator1.setForeground(new Color(80, 80, 80)); // Un gris oscuro en lugar de claro
-            }
-        });
-
-        // --- 2. LISTENER DE FOCO PARA CONTRASEÑA (CON ANIMACIÓN) ---
         tfContraseña.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -79,8 +48,7 @@ public class Login extends javax.swing.JFrame {
                     tfContraseña.setText("");
                     tfContraseña.setForeground(Color.BLACK);
                 }
-                // jSeparator2.setForeground(new Color(153, 0, 255));
-                jSeparator2.setForeground(new Color(80, 80, 80)); // Un gris oscuro en lugar de claro
+                jSeparator2.setForeground(new Color(80, 80, 80));
 
             }
 
@@ -90,12 +58,10 @@ public class Login extends javax.swing.JFrame {
                     tfContraseña.setText("* * * * * * * *");
                     tfContraseña.setForeground(Color.GRAY);
                 }
-                // jSeparator2.setForeground(new Color(204, 204, 204));
-                jSeparator2.setForeground(new Color(80, 80, 80)); // Un gris oscuro en lugar de claro
+                jSeparator2.setForeground(new Color(80, 80, 80));
             }
         });
 
-        // --- 3. LISTENER DEL OJO (MOSTRAR/OCULTAR) ---
         lbOjo.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -107,22 +73,16 @@ public class Login extends javax.swing.JFrame {
                     passwordVisible = !passwordVisible;
                     if (passwordVisible) {
                         tfContraseña.setEchoChar((char) 0);
-                        // (Opcional) Cambia el icono a "ojo tachado"
-                        // lbOjo.setIcon(new ImageIcon(getClass().getResource("/Imagenes/ojo_tachado.png")));
                     } else {
                         tfContraseña.setEchoChar('•');
-                        // (Opcional) Cambia el icono a "ojo normal"
-                        // lbOjo.setIcon(new ImageIcon(getClass().getResource("/Imagenes/ojo.png")));
                     }
                 }
             }
         });
 
-        // --- 4. LISTENER PARA BORRAR ERRORES (CORREGIDO) ---
         KeyAdapter borradorDeErrores = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                // ¡CORRECCIÓN! Borra el error con cualquier tecla EXCEPTO "Enter"
                 if (e.getKeyCode() != KeyEvent.VK_ENTER) {
                     lbMensajeError.setText("");
                 }
@@ -131,40 +91,31 @@ public class Login extends javax.swing.JFrame {
         tfUsuario.addKeyListener(borradorDeErrores);
         tfContraseña.addKeyListener(borradorDeErrores);
 
-        // --- 5. LISTENER PARA LOGIN CON "ENTER" (CORRECTO) ---
         tfContraseña.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    // Esto funciona porque 'btnSesion' es un JButton
                     btnSesion.doClick();
                 }
             }
         });
 
-        // En el constructor de Vista/Login.java
-// --- 6. CÓDIGO DEL SPINNER DE CARGA (CON REDIMENSIONAMIENTO) ---
         String rutaSpinner = "/Imagenes/spinner.gif";
         try {
-            // Carga la imagen original
+
             ImageIcon originalIcon = new ImageIcon(getClass().getResource(rutaSpinner));
 
-            // Define el tamaño deseado (ej. 32x32)
             int anchoDeseado = 90;
             int altoDeseado = 90;
 
-            // Obtiene la imagen y la escala
-            // Usamos Image.SCALE_DEFAULT para que respete la animación del GIF
             Image scaledImage = originalIcon.getImage().getScaledInstance(
                     anchoDeseado, altoDeseado, Image.SCALE_DEFAULT
             );
 
-            // Crea un nuevo ImageIcon con la imagen escalada
             ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
-            // Asigna el icono escalado (y ahora pequeño) al JLabel
             lbSpinner.setIcon(scaledIcon);
-            lbSpinner.setVisible(false); // Sigue oculto por defecto
+            lbSpinner.setVisible(false);
 
         } catch (Exception ex) {
             System.err.println("Error al cargar o redimensionar el spinner: " + ex.getMessage());
@@ -419,9 +370,6 @@ public class Login extends javax.swing.JFrame {
         btnSesion.setBackground(new Color(153, 0, 255));
     }//GEN-LAST:event_btnSesionMouseReleased
 
-    /**
-     * @param args the command line arguments
-     */
 //    public static void main(String args[]) {
 //        /* Set the Nimbus look and feel */
 //        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
