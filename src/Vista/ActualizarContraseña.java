@@ -20,8 +20,6 @@ public class ActualizarContraseña extends javax.swing.JFrame {
     public ActualizarContraseña() {
         initComponents();
         this.setLocationRelativeTo(this);
-
-        this.setLocationRelativeTo(null);
         this.setResizable(false);
 
         try {
