@@ -16,37 +16,37 @@ import javax.swing.Timer;
 public class Test {
 
     public static void main(String[] args) {
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                final SplashScreen splash = new SplashScreen();
-                splash.fadeIn();
-
-                int duracionSplashVisible = 3000;
-
-                Timer timer = new Timer(duracionSplashVisible, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                        ((Timer) e.getSource()).stop();
-
-                        splash.fadeOut(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-
-                                UsuarioDao modelo = new UsuarioDao();
-                                Login vista = new Login();
-                                LoginControlador controlador = new LoginControlador(vista, modelo);
-                                vista.setVisible(true);
-                            }
-                        });
-                    }
-                });
-                timer.setRepeats(false);
-                timer.start();
-            }
-        });
+//
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                final SplashScreen splash = new SplashScreen();
+//                splash.fadeIn();
+//
+//                int duracionSplashVisible = 3000;
+//
+//                Timer timer = new Timer(duracionSplashVisible, new ActionListener() {
+//                    @Override
+//                    public void actionPerformed(ActionEvent e) {
+//
+//                        ((Timer) e.getSource()).stop();
+//
+//                        splash.fadeOut(new ActionListener() {
+//                            @Override
+//                            public void actionPerformed(ActionEvent e) {
+//
+//                                UsuarioDao modelo = new UsuarioDao();
+//                                Login vista = new Login();
+//                                LoginControlador controlador = new LoginControlador(vista, modelo);
+//                                vista.setVisible(true);
+//                            }
+//                        });
+//                    }
+//                });
+//                timer.setRepeats(false);
+//                timer.start();
+//            }
+//        });
 
 
         // Vista crear partida
@@ -54,10 +54,10 @@ public class Test {
 //      Controlador.CrearPartidaControlador ctrl = new Controlador.CrearPartidaControlador(vista);
 //      vista.setVisible(true);
 
-        // Vista libro diario
-//        Vista.LibroDiario vistaLD = new Vista.LibroDiario();
-//        Controlador.LibroDiarioControlador ctrl = new Controlador.LibroDiarioControlador(vistaLD);
-//        vistaLD.setVisible(true);
+         //Vista libro diario
+        Vista.LibroDiario vistaLD = new Vista.LibroDiario();
+        Controlador.LibroDiarioControlador ctrl = new Controlador.LibroDiarioControlador(vistaLD);
+        vistaLD.setVisible(true);
 
     }
 
