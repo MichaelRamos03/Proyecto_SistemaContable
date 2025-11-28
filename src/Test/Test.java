@@ -47,18 +47,6 @@ public class Test {
                 timer.start();
             }
         });
-
-
-        // Vista crear partida
-//      Vista.CrearPartida vista = new Vista.CrearPartida();    
-//      Controlador.CrearPartidaControlador ctrl = new Controlador.CrearPartidaControlador(vista);
-//      vista.setVisible(true);
-
-        // Vista libro diario
-//        Vista.LibroDiario vistaLD = new Vista.LibroDiario();
-//        Controlador.LibroDiarioControlador ctrl = new Controlador.LibroDiarioControlador(vistaLD);
-//        vistaLD.setVisible(true);
-
     }
 
 }
