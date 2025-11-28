@@ -5,6 +5,7 @@
 package Vista;
 
 import Utilidades.Fondo;
+import static java.lang.System.exit;
 import javax.swing.JFrame;
 
 /**
@@ -99,11 +100,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnBalanzaComprobacion.setText("Balanza de Comprobación");
         BtnBalanzaComprobacion.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnBalanzaComprobacion.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnBalanzaComprobacion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnBalanzaComprobacionActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnBalanzaComprobacion, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 260, 40));
 
         BtnEstadoResultado.setBackground(new java.awt.Color(153, 102, 255));
@@ -112,11 +108,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnEstadoResultado.setText("Estado de Resultados");
         BtnEstadoResultado.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnEstadoResultado.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnEstadoResultado.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnEstadoResultadoActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnEstadoResultado, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 240, 260, 30));
 
         BtnBalanzaGeneral.setBackground(new java.awt.Color(153, 102, 255));
@@ -125,11 +116,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnBalanzaGeneral.setText("Balance General");
         BtnBalanzaGeneral.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnBalanzaGeneral.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnBalanzaGeneral.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnBalanzaGeneralActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnBalanzaGeneral, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 290, 260, 30));
 
         BtnPartidaAjuste.setBackground(new java.awt.Color(153, 102, 255));
@@ -138,11 +124,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnPartidaAjuste.setText("Partidas de Ajuste");
         BtnPartidaAjuste.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnPartidaAjuste.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnPartidaAjuste.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnPartidaAjusteActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnPartidaAjuste, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 340, 260, -1));
 
         BtnPartidasCierre.setBackground(new java.awt.Color(153, 102, 255));
@@ -151,11 +132,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnPartidasCierre.setText("Partidas de Cierre");
         BtnPartidasCierre.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnPartidasCierre.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnPartidasCierre.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnPartidasCierreActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnPartidasCierre, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 400, 230, -1));
 
         BtnCierreContable.setBackground(new java.awt.Color(153, 102, 255));
@@ -164,11 +140,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnCierreContable.setText("Cierre Contable");
         BtnCierreContable.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnCierreContable.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnCierreContable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnCierreContableActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnCierreContable, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 450, 230, -1));
 
         BtnLibroDiario.setBackground(new java.awt.Color(153, 102, 255));
@@ -177,9 +148,9 @@ public class DashBoard extends javax.swing.JFrame {
         BtnLibroDiario.setText("Libro Diario");
         BtnLibroDiario.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnLibroDiario.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnLibroDiario.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnLibroDiarioActionPerformed(evt);
+        BtnLibroDiario.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnLibroDiarioMouseClicked(evt);
             }
         });
         FondoJscroll.add(BtnLibroDiario, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 250, 30));
@@ -190,11 +161,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnLibroMayor.setText("Libro Mayor");
         BtnLibroMayor.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnLibroMayor.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnLibroMayor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnLibroMayorActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnLibroMayor, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 260, 30));
 
         BtnAgregarPartidas.setBackground(new java.awt.Color(153, 102, 255));
@@ -203,9 +169,9 @@ public class DashBoard extends javax.swing.JFrame {
         BtnAgregarPartidas.setText("Agregar Partidas");
         BtnAgregarPartidas.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnAgregarPartidas.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnAgregarPartidas.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnAgregarPartidasActionPerformed(evt);
+        BtnAgregarPartidas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnAgregarPartidasMouseClicked(evt);
             }
         });
         FondoJscroll.add(BtnAgregarPartidas, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 260, 30));
@@ -216,11 +182,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnPeriodoContable.setText("Periodo Contable");
         BtnPeriodoContable.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnPeriodoContable.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnPeriodoContable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnPeriodoContableActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnPeriodoContable, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 510, 270, -1));
 
         BtnGenerarBackup.setBackground(new java.awt.Color(153, 102, 255));
@@ -229,11 +190,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnGenerarBackup.setText("Generar backup");
         BtnGenerarBackup.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnGenerarBackup.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnGenerarBackup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnGenerarBackupActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnGenerarBackup, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 570, 270, -1));
 
         BtnCatalogo.setBackground(new java.awt.Color(153, 102, 255));
@@ -242,11 +198,6 @@ public class DashBoard extends javax.swing.JFrame {
         BtnCatalogo.setText("Catalogo");
         BtnCatalogo.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnCatalogo.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnCatalogo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnCatalogoActionPerformed(evt);
-            }
-        });
         FondoJscroll.add(BtnCatalogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 630, 270, 40));
 
         jScrollPane1.setViewportView(FondoJscroll);
@@ -259,9 +210,9 @@ public class DashBoard extends javax.swing.JFrame {
         BtnCerrarSesion.setText("Cerrar Sesion");
         BtnCerrarSesion.setFont(new java.awt.Font("Arial Black", 1, 12)); // NOI18N
         BtnCerrarSesion.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        BtnCerrarSesion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnCerrarSesionActionPerformed(evt);
+        BtnCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnCerrarSesionMouseClicked(evt);
             }
         });
         jPanel2.add(BtnCerrarSesion, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 630, 270, 50));
@@ -295,57 +246,24 @@ public class DashBoard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void BtnLibroDiarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnLibroDiarioActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnLibroDiarioActionPerformed
+    private void BtnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnCerrarSesionMouseClicked
+           exit(0);
+    }//GEN-LAST:event_BtnCerrarSesionMouseClicked
 
-    private void BtnBalanzaComprobacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBalanzaComprobacionActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnBalanzaComprobacionActionPerformed
+    private void BtnAgregarPartidasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnAgregarPartidasMouseClicked
+        // Vista crear partida
+      Vista.CrearPartida vista = new Vista.CrearPartida();    
+      Controlador.CrearPartidaControlador ctrl = new Controlador.CrearPartidaControlador(vista);
+      vista.setVisible(true);
+    }//GEN-LAST:event_BtnAgregarPartidasMouseClicked
 
-    private void BtnEstadoResultadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEstadoResultadoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnEstadoResultadoActionPerformed
+    private void BtnLibroDiarioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnLibroDiarioMouseClicked
+       //Vista libro diario
+        Vista.LibroDiario vistaLD = new Vista.LibroDiario();
+        Controlador.LibroDiarioControlador ctrl = new Controlador.LibroDiarioControlador(vistaLD);
+        vistaLD.setVisible(true);
 
-    private void BtnBalanzaGeneralActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBalanzaGeneralActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnBalanzaGeneralActionPerformed
-
-    private void BtnPartidaAjusteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPartidaAjusteActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnPartidaAjusteActionPerformed
-
-    private void BtnPartidasCierreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPartidasCierreActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnPartidasCierreActionPerformed
-
-    private void BtnCierreContableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCierreContableActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnCierreContableActionPerformed
-
-    private void BtnPeriodoContableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPeriodoContableActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnPeriodoContableActionPerformed
-
-    private void BtnAgregarPartidasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAgregarPartidasActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnAgregarPartidasActionPerformed
-
-    private void BtnLibroMayorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnLibroMayorActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnLibroMayorActionPerformed
-
-    private void BtnGenerarBackupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGenerarBackupActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnGenerarBackupActionPerformed
-
-    private void BtnCatalogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCatalogoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnCatalogoActionPerformed
-
-    private void BtnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCerrarSesionActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BtnCerrarSesionActionPerformed
+    }//GEN-LAST:event_BtnLibroDiarioMouseClicked
 
     /**
      * @param args the command line arguments
