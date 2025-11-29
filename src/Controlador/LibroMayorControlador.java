@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controlador;
 
 import Dao.MayorDao;
@@ -17,21 +13,22 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.Date;
+import rojeru_san.componentes.RSDateChooser; // Import necesario para el tipo de componente de fecha
 
-/**
- *
- * @author PC
- */
 public class LibroMayorControlador implements ActionListener {
 
-    private LibroMayor vista;
-    private MayorDao dao;
+    private final LibroMayor vista;
+    private final MayorDao dao;
     private final DecimalFormat formatter = new DecimalFormat("#,##0.00");
 
     public LibroMayorControlador(LibroMayor vista) {
         this.vista = vista;
         this.dao = new MayorDao();
+
+        // Enlace de los botones
         this.vista.btnBuscar.addActionListener(this);
+        this.vista.btnLimpiar.addActionListener(this);
 
         init();
     }
@@ -40,8 +37,19 @@ public class LibroMayorControlador implements ActionListener {
         vista.setLocationRelativeTo(null);
         vista.setTitle("Libro Mayor");
         llenarComboCuentas();
+        // Sincronización del JTextField y RSComboBox
         activarSincronizacion();
-        mostrarMayorGeneral();
+        // Carga Inicial: Mayor General completo (null, null)
+        mostrarMayorGeneral(null, null);
+    }
+
+    // Método auxiliar para obtener fechas (convierte util.Date a sql.Date)
+    // Devuelve null si no hay fecha seleccionada.
+    private java.sql.Date obtenerFechas(RSDateChooser rsDate) {
+        if (rsDate.getDatoFecha() == null) {
+            return null;
+        }
+        return new java.sql.Date(rsDate.getDatoFecha().getTime());
     }
 
     private void llenarComboCuentas() {
@@ -56,7 +64,6 @@ public class LibroMayorControlador implements ActionListener {
 
     private void activarSincronizacion() {
         vista.cbCuentasM.addActionListener(e -> {
-
             if (!vista.txtCodigo.isFocusOwner() && vista.cbCuentasM.getSelectedItem() != null) {
                 CuentaItem item = (CuentaItem) vista.cbCuentasM.getSelectedItem();
                 if (item.getCodigo().equals("")) {
@@ -113,35 +120,63 @@ public class LibroMayorControlador implements ActionListener {
         }
     }
 
+    // =========================================================================
+    // LÓGICA DE EVENTOS (BUSCAR Y LIMPIAR)
+    // =========================================================================
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == vista.btnBuscar) {
+        if (e.getSource() == vista.btnLimpiar) {
+            limpiarFiltrosYRecargarGeneral();
+        } else if (e.getSource() == vista.btnBuscar) {
             String codigoCuenta = vista.txtCodigo.getText().trim();
 
-            if (codigoCuenta.isEmpty()) {
-                mostrarMayorGeneral();
+            Date fechaDesde = obtenerFechas(vista.rsDesde);
+            Date fechaHasta = obtenerFechas(vista.rsHasta);
+
+            if (!codigoCuenta.isEmpty()) {
+                // MODO 1: Búsqueda por cuenta (con o sin fechas)
+                mostrarMayor(fechaDesde, fechaHasta);
             } else {
-                mostrarMayor();
+                // MODO 2: Mayor General (con o sin fechas)
+                mostrarMayorGeneral(fechaDesde, fechaHasta);
             }
         }
     }
 
-    private void mostrarMayor() {
+    /**
+     * Limpia todos los campos de filtro y recarga el Mayor General completo
+     * (todo el historial).
+     */
+    private void limpiarFiltrosYRecargarGeneral() {
+        // 1. Limpiar campos de filtro
+        vista.txtCodigo.setText("");
+        vista.rsDesde.setDatoFecha(null); // Esto es CLAVE: pone la fecha en null
+        vista.rsHasta.setDatoFecha(null); // Esto es CLAVE: pone la fecha en null
+        vista.cbCuentasM.setSelectedIndex(0);
+
+        // 2. Recargar el Mayor General completo (pasa null, null)
+        mostrarMayorGeneral(null, null);
+
+        JOptionPane.showMessageDialog(vista, "Filtros limpiados. Mostrando Mayor General completo.", "Filtros Resetados", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // =========================================================================
+    // MODALIDAD 1: BÚSQUEDA ESPECÍFICA (Por cuenta con o sin filtro de fechas)
+    // =========================================================================
+    private void mostrarMayor(Date fechaDesde, Date fechaHasta) {
         String codigoCuenta = vista.txtCodigo.getText().trim();
 
-        if (codigoCuenta.isEmpty()) {
-            JOptionPane.showMessageDialog(vista, "Debe seleccionar o ingresar un código de cuenta.", "Error", JOptionPane.ERROR_MESSAGE);
-            vista.TablaM.setModel(new DefaultTableModel());
-            vista.txtSaldoFinal.setText("$0.00");
-            return;
-        }
+        // Establecer fechas comodín si son nulas: 1970-01-01 hasta la fecha actual
+        Date fD = (fechaDesde != null) ? fechaDesde : new Date(0);
+        Date fH = (fechaHasta != null) ? fechaHasta : new Date(new java.util.Date().getTime());
 
         CuentaMayor cuentaInfo = null;
         List<MayorDto> lsTransaccion = null;
 
         try {
             cuentaInfo = dao.obtenerInfoCuentaPorCodigo(codigoCuenta);
-            lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta);
+            // El DAO usa fD y fH, que pueden ser fechas específicas o comodín.
+            lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta, fD, fH);
 
         } catch (Exception ex) {
             Logger.getLogger(LibroMayorControlador.class.getName()).log(Level.SEVERE, "Error DB al cargar Mayor", ex);
@@ -159,10 +194,7 @@ public class LibroMayorControlador implements ActionListener {
         }
 
         if (lsTransaccion.isEmpty()) {
-            JOptionPane.showMessageDialog(vista, "Esta cuenta no tiene transacciones registradas.", "Sin Registros", JOptionPane.INFORMATION_MESSAGE);
-            vista.TablaM.setModel(new DefaultTableModel());
-            vista.txtSaldoFinal.setText("$0.00");
-            return;
+            JOptionPane.showMessageDialog(vista, "Esta cuenta no tiene transacciones registradas en el rango seleccionado.", "Sin Registros", JOptionPane.INFORMATION_MESSAGE);
         }
 
         DefaultTableModel modelo = new DefaultTableModel();
@@ -170,18 +202,18 @@ public class LibroMayorControlador implements ActionListener {
         modelo.setColumnIdentifiers(titulos);
 
         double saldoAcum = 0;
-        String naturalezaCuenta = cuentaInfo.getTipoCuenta().toUpperCase(); 
+        String naturalezaCuenta = cuentaInfo.getTipoCuenta().toUpperCase();
         String naturalezaFinalEnTabla = "";
 
         for (MayorDto x : lsTransaccion) {
-
+            // Cálculo del saldo acumulado
             if (naturalezaCuenta.equals("DEUDORA")) {
                 saldoAcum = saldoAcum + x.getCargo() - x.getAbono();
-
             } else if (naturalezaCuenta.equals("ACREEDORA")) {
                 saldoAcum = saldoAcum - x.getCargo() + x.getAbono();
             }
 
+            // Determinación de la naturaleza del saldo actual
             if (saldoAcum == 0) {
                 naturalezaFinalEnTabla = "";
             } else if ((naturalezaCuenta.equals("DEUDORA") && saldoAcum > 0) || (naturalezaCuenta.equals("ACREEDORA") && saldoAcum < 0)) {
@@ -191,12 +223,9 @@ public class LibroMayorControlador implements ActionListener {
             }
 
             Object datos[] = {
-                x.getFecha(),
-                x.getDescripcion(),
-                x.getPartida(),
+                x.getFecha(), x.getDescripcion(), x.getPartida(),
                 x.getCargo() > 0 ? "$" + formatter.format(x.getCargo()) : "",
                 x.getAbono() > 0 ? "$" + formatter.format(x.getAbono()) : "",
-
                 "$" + formatter.format(Math.abs(saldoAcum)) + " " + naturalezaFinalEnTabla
             };
             modelo.addRow(datos);
@@ -206,22 +235,29 @@ public class LibroMayorControlador implements ActionListener {
 
         String naturalezaFinalReporte;
         double saldoAbsoluto = Math.abs(saldoAcum);
-
+        // Lógica de saldo final
         if (saldoAcum == 0) {
             naturalezaFinalReporte = "CERO";
         } else if (naturalezaCuenta.equals("DEUDORA")) {
             naturalezaFinalReporte = (saldoAcum > 0) ? "DEUDOR" : "ACREEDOR";
-        } else { 
+        } else {
             naturalezaFinalReporte = (saldoAcum > 0) ? "ACREEDOR" : "DEUDOR";
         }
 
         String resultadoFormateado = "$" + formatter.format(saldoAbsoluto);
         resultadoFormateado += " SALDO " + naturalezaFinalReporte;
-
         vista.txtSaldoFinal.setText(resultadoFormateado);
     }
 
-    private void mostrarMayorGeneral() {
+    // =========================================================================
+    // MODALIDAD 2: MAYOR GENERAL (Todas las cuentas con o sin filtro de fechas)
+    // =========================================================================
+    private void mostrarMayorGeneral(Date fechaDesde, Date fechaHasta) {
+
+        // Fechas Comodín (todo el historial) si los parámetros son null
+        Date fD = (fechaDesde != null) ? fechaDesde : new Date(0);
+        Date fH = (fechaHasta != null) ? fechaHasta : new Date(new java.util.Date().getTime());
+
         List<String> codigosDeCuenta = dao.obtenerTodosLosCodigosDeCuenta();
 
         DefaultTableModel modelo = new DefaultTableModel();
@@ -237,59 +273,49 @@ public class LibroMayorControlador implements ActionListener {
 
         try {
             for (String codigoCuenta : codigosDeCuenta) {
-
                 CuentaMayor cuentaInfo = dao.obtenerInfoCuentaPorCodigo(codigoCuenta);
 
                 if (cuentaInfo != null) {
-
-                    List<MayorDto> lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta);
+                    // LLAMADA: se usa el código de cuenta y el rango de fechas (filtrado o comodín)
+                    List<MayorDto> lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta, fD, fH);
 
                     if (!lsTransaccion.isEmpty()) {
 
+                        // Encabezado de la Cuenta
                         modelo.addRow(new Object[]{"", "", "", "", "", "", ""});
                         modelo.addRow(new Object[]{
-                            "CUENTA",
-                            codigoCuenta + " - " + cuentaInfo.getNombre(),
-                            "INICIO",
-                            "", "", "", ""
+                            "CUENTA", codigoCuenta, cuentaInfo.getNombre(), "INICIO", "", "", ""
                         });
 
                         double saldoAcum = 0;
                         String naturalezaCuenta = cuentaInfo.getTipoCuenta().toUpperCase();
 
                         for (MayorDto x : lsTransaccion) {
-
-                            // Lógica contable
                             if (naturalezaCuenta.equals("DEUDORA")) {
                                 saldoAcum = saldoAcum + x.getCargo() - x.getAbono();
                             } else if (naturalezaCuenta.equals("ACREEDORA")) {
                                 saldoAcum = saldoAcum - x.getCargo() + x.getAbono();
                             }
 
-                            String naturalezaEnTabla = (saldoAcum == 0) ? "" : (saldoAcum > 0 ? "DEUDORA" : "ACREEDORA");
+                            String naturalezaEnTabla = (saldoAcum == 0) ? "" : ((naturalezaCuenta.equals("DEUDORA") && saldoAcum >= 0) || (naturalezaCuenta.equals("ACREEDORA") && saldoAcum < 0) ? "DEUDORA" : "ACREEDORA");
 
                             Object datos[] = {
-                                x.getFecha(),
-                                "",
-                                x.getDescripcion(),
-                                x.getPartida(),
+                                x.getFecha(), "", x.getDescripcion(), x.getPartida(),
                                 x.getCargo() > 0 ? "$" + formatter.format(x.getCargo()) : "",
                                 x.getAbono() > 0 ? "$" + formatter.format(x.getAbono()) : "",
-                                "$" + formatter.format(Math.abs(saldoAcum)) + " " + naturalezaEnTabla
+                                "$" + formatter.format(Math.abs(saldoAcum)) + " " + (saldoAcum == 0 ? "" : naturalezaEnTabla)
                             };
                             modelo.addRow(datos);
                         }
 
-                        String naturalezaFinalReporte = (saldoAcum == 0) ? "CERO" : (saldoAcum > 0 ? "DEUDOR" : "ACREEDOR");
+                        // Subtotal de la Cuenta
+                        String naturalezaFinalReporte = (saldoAcum == 0) ? "CERO" : (naturalezaCuenta.equals("DEUDORA") ? (saldoAcum > 0 ? "DEUDOR" : "ACREEDOR") : (saldoAcum > 0 ? "ACREEDOR" : "DEUDOR"));
 
                         modelo.addRow(new Object[]{
-                            "", "", "",
-                            "SALDO FINAL",
-                            "",
-                            "",
-                            "$" + formatter.format(Math.abs(saldoAcum)) + " " + naturalezaFinalReporte
+                            "", "", "SALDO FINAL", "", "", "",
+                            "$" + formatter.format(Math.abs(saldoAcum)) + " SALDO " + naturalezaFinalReporte
                         });
-                        modelo.addRow(new Object[]{"", "", "", "", "", "", ""}); // Fila en blanco
+                        modelo.addRow(new Object[]{"", "", "", "", "", "", ""});
                     }
                 }
             }
@@ -301,5 +327,4 @@ public class LibroMayorControlador implements ActionListener {
         vista.TablaM.setModel(modelo);
         vista.txtSaldoFinal.setText("MAYOR GENERAL");
     }
-
 }
