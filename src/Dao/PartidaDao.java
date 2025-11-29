@@ -47,7 +47,7 @@ public class PartidaDao {
             int idAsientoGenerado = 0;
 
             if (rs.next()) {
-                idAsientoGenerado = rs.getInt(1); 
+                idAsientoGenerado = rs.getInt(1);
             }
 
             String sqlDetalle = "INSERT INTO asientos_detalle (id_asiento, id_cuenta, debe, haber) VALUES (?, (SELECT id_cuenta FROM cuentas_contables WHERE codigo_cuenta = ?), ?, ?)";
@@ -55,7 +55,7 @@ public class PartidaDao {
 
             for (DetallePartida det : detalles) {
                 psDet.setInt(1, idAsientoGenerado);
-                psDet.setString(2, det.getCodigoCuenta()); 
+                psDet.setString(2, det.getCodigoCuenta());
                 psDet.setDouble(3, det.getDebe());
                 psDet.setDouble(4, det.getHaber());
                 psDet.addBatch();
@@ -138,6 +138,41 @@ public class PartidaDao {
             e.printStackTrace();
         }
         return lista;
+    }
+
+    public double obtenerSaldoPorCodigo(String codigoBase, Date desde, Date hasta, String naturaleza) {
+        double saldo = 0;
+
+        String sql = "SELECT SUM(d.debe), SUM(d.haber) "
+                + "FROM asientos_detalle d "
+                + "JOIN asientos_cabecera c ON d.id_asiento = c.id_asiento "
+                + "JOIN cuentas_contables cu ON d.id_cuenta = cu.id_cuenta "
+                + "WHERE cu.codigo_cuenta LIKE ? "
+                + "AND c.fecha_contable BETWEEN ? AND ?";
+
+        try (java.sql.Connection con = Conexion.getConnection(); java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, codigoBase + "%");
+            ps.setDate(2, desde);
+            ps.setDate(3, hasta);
+
+            java.sql.ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                double sumaDebe = rs.getDouble(1);
+                double sumaHaber = rs.getDouble(2);
+
+
+                if (naturaleza.equals("DEUDORA")) {
+                    saldo = sumaDebe - sumaHaber;
+                } else { 
+                    saldo = sumaHaber - sumaDebe;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return saldo;
     }
 
 }

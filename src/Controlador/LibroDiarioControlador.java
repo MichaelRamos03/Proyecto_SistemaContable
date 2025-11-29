@@ -17,45 +17,55 @@ import java.beans.PropertyChangeListener;
  */
 public class LibroDiarioControlador implements ActionListener {
 
-   private LibroDiario vista;
+    private LibroDiario vista;
     private PartidaDao dao;
 
     public LibroDiarioControlador(LibroDiario vista) {
         this.vista = vista;
         this.dao = new PartidaDao();
         this.vista.btnBuscar.addActionListener(this);
-        this.vista.btnLimpiar.addActionListener(this); 
+        this.vista.btnLimpiar.addActionListener(this);
         vista.rsDesde.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if ("date".equals(evt.getPropertyName())) generarReportePorFechas();
+                if ("date".equals(evt.getPropertyName())) {
+                    generarReportePorFechas();
+                }
             }
         });
-        
+
         vista.rsHasta.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if ("date".equals(evt.getPropertyName())) generarReportePorFechas();
+                if ("date".equals(evt.getPropertyName())) {
+                    generarReportePorFechas();
+                }
             }
         });
 
         this.vista.setLocationRelativeTo(null);
         this.vista.setTitle("Libro Diario");
         maquillarTable();
-        
-        mostrarTodoElHistorial(); 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         if (e.getSource() == vista.btnBuscar) {
             generarReportePorFechas();
-        }
-         else if (e.getSource() == vista.btnLimpiar) {
+        } 
+        else if (e.getSource() == vista.btnLimpiar) {
+
             vista.rsDesde.setDatoFecha(null);
             vista.rsHasta.setDatoFecha(null);
-            mostrarTodoElHistorial();
-        } 
+
+            DefaultTableModel modelo = (DefaultTableModel) vista.Table.getModel();
+            modelo.setRowCount(0);
+
+            vista.lbTotalDebe.setText("0.00");
+            vista.lbTotalHaber.setText("0.00");
+
+        }
     }
 
     private void mostrarTodoElHistorial() {
@@ -64,14 +74,30 @@ public class LibroDiarioControlador implements ActionListener {
     }
 
     private void generarReportePorFechas() {
-        if (vista.rsDesde.getDatoFecha()== null || vista.rsHasta.getDatoFecha()== null) {
+
+        java.util.Date fechaD = vista.rsDesde.getDatoFecha();
+        java.util.Date fechaH = vista.rsHasta.getDatoFecha();
+
+
+        if (fechaD == null || fechaH == null) {
+            DefaultTableModel modelo = (DefaultTableModel) vista.Table.getModel();
+            modelo.setRowCount(0); 
+            vista.lbTotalDebe.setText("0.00");
+            vista.lbTotalHaber.setText("0.00");
             return;
         }
 
-        java.sql.Date fecha1 = new java.sql.Date(vista.rsDesde.getDatoFecha().getTime());
-        java.sql.Date fecha2 = new java.sql.Date(vista.rsHasta.getDatoFecha().getTime());
 
-        List<Object[]> datos = dao.obtenerReporteLibroDiario(fecha1, fecha2);
+        if (fechaD.after(fechaH)) {
+
+            return;
+        }
+
+
+        java.sql.Date sqlFechaDesde = new java.sql.Date(fechaD.getTime());
+        java.sql.Date sqlFechaHasta = new java.sql.Date(fechaH.getTime());
+
+        List<Object[]> datos = dao.obtenerReporteLibroDiario(sqlFechaDesde, sqlFechaHasta);
         llenarTablaConFormato(datos);
     }
 
@@ -92,7 +118,7 @@ public class LibroDiarioControlador implements ActionListener {
         double totalGlobalHaber = 0;
 
         for (Object[] fila : datos) {
-            idActual = (int) fila[1]; 
+            idActual = (int) fila[1];
 
             if (idActual != idAnterior) {
                 if (idAnterior != -1) {
@@ -105,10 +131,10 @@ public class LibroDiarioControlador implements ActionListener {
 
             double debe = (double) fila[5];
             double haber = (double) fila[6];
-            
+
             modelo.addRow(new Object[]{
-                "", "", fila[2], fila[3], "", 
-                (debe > 0) ? String.format("%.2f", debe) : "", 
+                "", "", fila[2], fila[3], "",
+                (debe > 0) ? String.format("%.2f", debe) : "",
                 (haber > 0) ? String.format("%.2f", haber) : ""
             });
 
@@ -127,14 +153,14 @@ public class LibroDiarioControlador implements ActionListener {
 
     private void agregarFilaConcepto(DefaultTableModel modelo, String concepto) {
         modelo.addRow(new Object[]{"", "", "", "   ( " + concepto + " )", "", "", ""});
-        modelo.addRow(new Object[]{"", "", "", "", "", "", ""}); 
+        modelo.addRow(new Object[]{"", "", "", "", "", "", ""});
     }
-    
+
     private void maquillarTable() {
 
         vista.Table.getColumnModel().getColumn(0).setPreferredWidth(80);  // Fecha
         vista.Table.getColumnModel().getColumn(1).setPreferredWidth(0);  // #
-             vista.Table.getColumnModel().getColumn(1).setMaxWidth(0);    // Ocultamos columna #
+        vista.Table.getColumnModel().getColumn(1).setMaxWidth(0);    // Ocultamos columna #
         vista.Table.getColumnModel().getColumn(2).setPreferredWidth(80);  // Código
         vista.Table.getColumnModel().getColumn(3).setPreferredWidth(250); // CUENTA (Ancha)
         vista.Table.getColumnModel().getColumn(4).setPreferredWidth(0);   // Concepto (Oculto o pequeño)
@@ -150,7 +176,6 @@ public class LibroDiarioControlador implements ActionListener {
 
 //        vista.Table.getColumnModel().getColumn(5).setCellRenderer(derecha); // Debe a la derecha
 //        vista.Table.getColumnModel().getColumn(6).setCellRenderer(derecha); // Haber a la derecha
-        
         vista.Table.setDefaultRenderer(Object.class, new Utilidades.RenderTableLibroDiario());
 
     }
