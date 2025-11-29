@@ -11,6 +11,7 @@ public class CrearPartida extends javax.swing.JFrame {
     public CrearPartida() {
         initComponents();
         this.setLocationRelativeTo(this);
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 //        Img.setBorder(new Utilidades.Fondo("/Imagenes/1.jpeg"));
     }
 

@@ -26,7 +26,6 @@ public class LoginControlador implements ActionListener {
     private final UsuarioDao modelo;
     private static final String PLACEHOLDER_USUARIO = "Ingrese su usuario";
     private static final String PLACEHOLDER_PASSWORD = "* * * * * * * *";
-    
 
     public LoginControlador(Login vista, UsuarioDao modelo) {
         this.vista = vista;
@@ -44,22 +43,21 @@ public class LoginControlador implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        
         String nombreUsuario = vista.tfUsuario.getText();
         String contrasena = new String(vista.tfContraseña.getPassword());
-        
-        if (ValidadorUtils.esCampoVacio(vista.tfUsuario, PLACEHOLDER_USUARIO )) {
+
+        if (ValidadorUtils.esCampoVacio(vista.tfUsuario, PLACEHOLDER_USUARIO)) {
             vista.lbMensajeError.setText("El campo de usuario esta vacío.");
             vista.iniciarAnimacionShake();
             return;
         }
-        
+
         if (ValidadorUtils.esCampoVacio(vista.tfContraseña, PLACEHOLDER_PASSWORD)) {
             vista.lbMensajeError.setText("El campo contraseña esta vacia.");
             vista.iniciarAnimacionShake();
             return;
         }
-        
+
         vista.btnSesion.setEnabled(false);
         vista.lbSpinner.setVisible(true);
         vista.lbMensajeError.setText("");
@@ -100,10 +98,11 @@ public class LoginControlador implements ActionListener {
                     String rol = usuarioValidado.getRol().getNombreRol();
                     NotificadorUtils.mostrarExito("¡Bienvenido, " + usuarioValidado.getNombreUsuario() + " (" + rol + ")!");
                     vista.dispose();
+                    
+                    abrirDashboard();
 
                 } else if (!errorOcurrio) {
                     vista.lbMensajeError.setText("Usuario o contraseña incorrectos.");
-
 
                     vista.iniciarAnimacionShake();
                 }
@@ -111,11 +110,24 @@ public class LoginControlador implements ActionListener {
         };
         worker.execute();
     }
-    
-        private void abrirVistaRecuperar() {
+
+    private void abrirVistaRecuperar() {
         vista.dispose();
-        RecuperarContraseña vistaRecu = new RecuperarContraseña(vista,true);
+        RecuperarContraseña vistaRecu = new RecuperarContraseña(vista, true);
         RecuperarContraseñaControlador ctrlRecu = new RecuperarContraseñaControlador(vistaRecu, this.modelo);
         vistaRecu.setVisible(true);
+    }
+
+    private void abrirDashboard() {
+
+        try {
+
+            Vista.DashBoard vistaDashboard = new Vista.DashBoard();
+            vistaDashboard.setVisible(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al abrir el Dashboard");
+        }
     }
 }
