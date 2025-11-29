@@ -4,6 +4,7 @@
  */
 package Vista;
 
+import Controlador.EstadoDeResultadoControlador;
 import Utilidades.Fondo;
 import static java.lang.System.exit;
 import javax.swing.JFrame;
@@ -108,6 +109,11 @@ public class DashBoard extends javax.swing.JFrame {
         BtnEstadoResultado.setText("Estado de Resultados");
         BtnEstadoResultado.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnEstadoResultado.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        BtnEstadoResultado.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnEstadoResultadoMouseClicked(evt);
+            }
+        });
         FondoJscroll.add(BtnEstadoResultado, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 240, 260, 30));
 
         BtnBalanzaGeneral.setBackground(new java.awt.Color(153, 102, 255));
@@ -264,6 +270,12 @@ public class DashBoard extends javax.swing.JFrame {
         vistaLD.setVisible(true);
 
     }//GEN-LAST:event_BtnLibroDiarioMouseClicked
+
+    private void BtnEstadoResultadoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnEstadoResultadoMouseClicked
+       Vista.EstadoDeResultado vista = new Vista.EstadoDeResultado();
+       Controlador.EstadoDeResultadoControlador ctr = new EstadoDeResultadoControlador(vista);
+       vista.setVisible(true);
+    }//GEN-LAST:event_BtnEstadoResultadoMouseClicked
 
     /**
      * @param args the command line arguments
