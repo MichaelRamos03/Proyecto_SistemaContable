@@ -21,13 +21,13 @@ public class BalanzaComprobacionControlador implements ActionListener{
     private final BalanzaDao dao;
     private final DecimalFormat formatter = new DecimalFormat("#,##0.00");
     
-    // Necesitas un botón btnLimpiar en tu vista BalanzaComprobacion.java
+
 
     public BalanzaComprobacionControlador(BalanzaComprobacion vista) {
         this.vista = vista;
         this.dao = new BalanzaDao();
         this.vista.btnBuscar.addActionListener(this);
-        // Asumo que tienes un botón btnLimpiar declarado en la vista BalanzaComprobacion.java
+
         this.vista.btnLimpiar.addActionListener(this);
         
         init();
@@ -36,7 +36,7 @@ public class BalanzaComprobacionControlador implements ActionListener{
     private void init() {
         vista.setLocationRelativeTo(null);
         vista.setTitle("Balanza de Comprobación");
-        // Carga Inicial: Balanza Completa
+
         generarBalanza(null, null); 
     }
 
@@ -55,7 +55,7 @@ public class BalanzaComprobacionControlador implements ActionListener{
             Date fechaDesde = obtenerFechas(vista.rsDesde);
             Date fechaHasta = obtenerFechas(vista.rsHasta);
             
-            // Si falta un rango, forzar al usuario a limpiarlos o completar.
+
             if ((fechaDesde != null && fechaHasta == null) || (fechaDesde == null && fechaHasta != null)) {
                  JOptionPane.showMessageDialog(vista, "Debe seleccionar un rango de fechas completo o limpiar los campos.", "Filtro Incompleto", JOptionPane.WARNING_MESSAGE);
                  return;
@@ -65,19 +65,19 @@ public class BalanzaComprobacionControlador implements ActionListener{
         }
     }
     
-    // 💡 NUEVO MÉTODO DE LIMPIEZA
+
     private void limpiarFiltrosYRecargarGeneral() {
-        // 1. Limpiar componentes RSDateChooser (ESTO ESTABLECE AMBOS EN NULL)
+
         vista.rsDesde.setDatoFecha(null); 
         vista.rsHasta.setDatoFecha(null); 
         
-        // 2. Recargar Balanza Completa (pasa null, null)
+
         generarBalanza(null, null);
         
         JOptionPane.showMessageDialog(vista, "Filtros limpiados. Mostrando Balanza de Comprobación completa.", "Filtros Resetados", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // MODALIDAD: GENERAR BALANZA (con o sin fechas)
+
     public void generarBalanza(Date fechaDesde, Date fechaHasta) {
         
         Date fD = (fechaDesde != null) ? fechaDesde : new Date(0); 
@@ -138,7 +138,7 @@ public class BalanzaComprobacionControlador implements ActionListener{
         vista.txtAcreedor.setText(formatter.format(totalSaldoAcreedor));
         
         if (totalSumasDebe != totalSumasHaber || totalSaldoDeudor != totalSaldoAcreedor) {
-             // Si quieres añadir una advertencia visual a la interfaz de usuario.
+             //añadir una advertencia visual a la interfaz de usuario.
         }
     }
 }

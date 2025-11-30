@@ -60,9 +60,9 @@ public class Test {
 //        vistaLD.setVisible(true);
 
         //vista Libro Mayor
-//        Vista.LibroMayor vistaM = new Vista.LibroMayor();
-//        Controlador.LibroMayorControlador ctrl = new Controlador.LibroMayorControlador(vistaM);
-//        vistaM.setVisible(true);
+        Vista.LibroMayor vistaM = new Vista.LibroMayor();
+        Controlador.LibroMayorControlador ctrl = new Controlador.LibroMayorControlador(vistaM);
+        vistaM.setVisible(true);
         
 //        Vista.BalanzaComprobacion vistaB = new Vista.BalanzaComprobacion();
 //        Controlador.BalanzaComprobacionControlador ctrl = new Controlador.BalanzaComprobacionControlador(vistaB);

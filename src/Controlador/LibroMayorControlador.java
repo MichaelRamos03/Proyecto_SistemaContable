@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Date;
-import rojeru_san.componentes.RSDateChooser; // Import necesario para el tipo de componente de fecha
+import rojeru_san.componentes.RSDateChooser;
 
 public class LibroMayorControlador implements ActionListener {
 
@@ -26,7 +26,7 @@ public class LibroMayorControlador implements ActionListener {
         this.vista = vista;
         this.dao = new MayorDao();
 
-        // Enlace de los botones
+
         this.vista.btnBuscar.addActionListener(this);
         this.vista.btnLimpiar.addActionListener(this);
 
@@ -37,14 +37,13 @@ public class LibroMayorControlador implements ActionListener {
         vista.setLocationRelativeTo(null);
         vista.setTitle("Libro Mayor");
         llenarComboCuentas();
-        // Sincronización del JTextField y RSComboBox
+
         activarSincronizacion();
         // Carga Inicial: Mayor General completo (null, null)
-        mostrarMayorGeneral(null, null);
+//        mostrarMayorGeneral(null, null);
     }
 
-    // Método auxiliar para obtener fechas (convierte util.Date a sql.Date)
-    // Devuelve null si no hay fecha seleccionada.
+
     private java.sql.Date obtenerFechas(RSDateChooser rsDate) {
         if (rsDate.getDatoFecha() == null) {
             return null;
@@ -120,9 +119,7 @@ public class LibroMayorControlador implements ActionListener {
         }
     }
 
-    // =========================================================================
-    // LÓGICA DE EVENTOS (BUSCAR Y LIMPIAR)
-    // =========================================================================
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == vista.btnLimpiar) {
@@ -143,26 +140,21 @@ public class LibroMayorControlador implements ActionListener {
         }
     }
 
-    /**
-     * Limpia todos los campos de filtro y recarga el Mayor General completo
-     * (todo el historial).
-     */
+
     private void limpiarFiltrosYRecargarGeneral() {
-        // 1. Limpiar campos de filtro
+
         vista.txtCodigo.setText("");
-        vista.rsDesde.setDatoFecha(null); // Esto es CLAVE: pone la fecha en null
-        vista.rsHasta.setDatoFecha(null); // Esto es CLAVE: pone la fecha en null
+        vista.rsDesde.setDatoFecha(null);
+        vista.rsHasta.setDatoFecha(null);
         vista.cbCuentasM.setSelectedIndex(0);
 
         // 2. Recargar el Mayor General completo (pasa null, null)
-        mostrarMayorGeneral(null, null);
+        //mostrarMayorGeneral(null, null);
 
-        JOptionPane.showMessageDialog(vista, "Filtros limpiados. Mostrando Mayor General completo.", "Filtros Resetados", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(vista, "Filtros limpiados.", "Filtros Resetados", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // =========================================================================
-    // MODALIDAD 1: BÚSQUEDA ESPECÍFICA (Por cuenta con o sin filtro de fechas)
-    // =========================================================================
+
     private void mostrarMayor(Date fechaDesde, Date fechaHasta) {
         String codigoCuenta = vista.txtCodigo.getText().trim();
 
@@ -175,7 +167,7 @@ public class LibroMayorControlador implements ActionListener {
 
         try {
             cuentaInfo = dao.obtenerInfoCuentaPorCodigo(codigoCuenta);
-            // El DAO usa fD y fH, que pueden ser fechas específicas o comodín.
+
             lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta, fD, fH);
 
         } catch (Exception ex) {
@@ -249,12 +241,10 @@ public class LibroMayorControlador implements ActionListener {
         vista.txtSaldoFinal.setText(resultadoFormateado);
     }
 
-    // =========================================================================
-    // MODALIDAD 2: MAYOR GENERAL (Todas las cuentas con o sin filtro de fechas)
-    // =========================================================================
+
     private void mostrarMayorGeneral(Date fechaDesde, Date fechaHasta) {
 
-        // Fechas Comodín (todo el historial) si los parámetros son null
+
         Date fD = (fechaDesde != null) ? fechaDesde : new Date(0);
         Date fH = (fechaHasta != null) ? fechaHasta : new Date(new java.util.Date().getTime());
 
@@ -276,7 +266,7 @@ public class LibroMayorControlador implements ActionListener {
                 CuentaMayor cuentaInfo = dao.obtenerInfoCuentaPorCodigo(codigoCuenta);
 
                 if (cuentaInfo != null) {
-                    // LLAMADA: se usa el código de cuenta y el rango de fechas (filtrado o comodín)
+
                     List<MayorDto> lsTransaccion = dao.obtenerCuentaMayor(codigoCuenta, fD, fH);
 
                     if (!lsTransaccion.isEmpty()) {
