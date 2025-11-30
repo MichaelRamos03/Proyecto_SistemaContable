@@ -64,9 +64,9 @@ public class Test {
 //        Controlador.LibroMayorControlador ctrl = new Controlador.LibroMayorControlador(vistaM);
 //        vistaM.setVisible(true);
         
-        Vista.BalanzaComprobacion vistaB = new Vista.BalanzaComprobacion();
-        Controlador.BalanzaComprobacionControlador ctrl = new Controlador.BalanzaComprobacionControlador(vistaB);
-        vistaB.setVisible(true);
+//        Vista.BalanzaComprobacion vistaB = new Vista.BalanzaComprobacion();
+//        Controlador.BalanzaComprobacionControlador ctrl = new Controlador.BalanzaComprobacionControlador(vistaB);
+//        vistaB.setVisible(true);
 
     }
 

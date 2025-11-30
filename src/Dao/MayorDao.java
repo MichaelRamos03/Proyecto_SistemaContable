@@ -42,17 +42,24 @@ public class MayorDao {
         return codigos;
     }
 
-    public CuentaMayor obtenerInfoCuentaPorCodigo(String codigo) throws SQLException {
+public CuentaMayor obtenerInfoCuentaPorCodigo(String codigo) throws SQLException {
         CuentaMayor cuenta = null;
-        String sql = "SELECT naturaleza, nombre_cuenta FROM cuentas_contables WHERE codigo_cuenta = ?";
+        
+        // --- AQUÍ ESTÁ EL ARREGLO ---
+        // Usamos COALESCE para que si la naturaleza es nula, devuelva 'DEUDORA'
+        String sql = "SELECT COALESCE(naturaleza, 'DEUDORA') as nat_segura, nombre_cuenta " +
+                     "FROM cuentas_contables WHERE codigo_cuenta = ?";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
             ps.setString(1, codigo);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     cuenta = new CuentaMayor();
-                    cuenta.setTipoCuenta(rs.getString("naturaleza"));
+                    // Leemos la columna segura
+                    cuenta.setTipoCuenta(rs.getString("nat_segura"));
                     cuenta.setNombre(rs.getString("nombre_cuenta"));
                 }
             }
@@ -95,4 +102,6 @@ public class MayorDao {
         }
         return transacciones;
     }
+    
+    
 }

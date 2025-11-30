@@ -4,7 +4,10 @@
  */
 package Vista;
 
+import Controlador.BalanceGeneralControlador;
+import Controlador.BalanzaComprobacionControlador;
 import Controlador.EstadoDeResultadoControlador;
+import Controlador.LibroMayorControlador;
 import Utilidades.Fondo;
 import static java.lang.System.exit;
 import javax.swing.JFrame;
@@ -101,6 +104,11 @@ public class DashBoard extends javax.swing.JFrame {
         BtnBalanzaComprobacion.setText("Balanza de Comprobación");
         BtnBalanzaComprobacion.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnBalanzaComprobacion.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        BtnBalanzaComprobacion.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnBalanzaComprobacionMouseClicked(evt);
+            }
+        });
         FondoJscroll.add(BtnBalanzaComprobacion, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 260, 40));
 
         BtnEstadoResultado.setBackground(new java.awt.Color(153, 102, 255));
@@ -122,6 +130,11 @@ public class DashBoard extends javax.swing.JFrame {
         BtnBalanzaGeneral.setText("Balance General");
         BtnBalanzaGeneral.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnBalanzaGeneral.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        BtnBalanzaGeneral.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnBalanzaGeneralMouseClicked(evt);
+            }
+        });
         FondoJscroll.add(BtnBalanzaGeneral, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 290, 260, 30));
 
         BtnPartidaAjuste.setBackground(new java.awt.Color(153, 102, 255));
@@ -167,6 +180,11 @@ public class DashBoard extends javax.swing.JFrame {
         BtnLibroMayor.setText("Libro Mayor");
         BtnLibroMayor.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
         BtnLibroMayor.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        BtnLibroMayor.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BtnLibroMayorMouseClicked(evt);
+            }
+        });
         FondoJscroll.add(BtnLibroMayor, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 260, 30));
 
         BtnAgregarPartidas.setBackground(new java.awt.Color(153, 102, 255));
@@ -276,6 +294,24 @@ public class DashBoard extends javax.swing.JFrame {
        Controlador.EstadoDeResultadoControlador ctr = new EstadoDeResultadoControlador(vista);
        vista.setVisible(true);
     }//GEN-LAST:event_BtnEstadoResultadoMouseClicked
+
+    private void BtnBalanzaComprobacionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnBalanzaComprobacionMouseClicked
+       Vista.BalanzaComprobacion vista = new BalanzaComprobacion();
+       Controlador.BalanzaComprobacionControlador ctr = new BalanzaComprobacionControlador(vista);
+       vista.setVisible(true);
+    }//GEN-LAST:event_BtnBalanzaComprobacionMouseClicked
+
+    private void BtnLibroMayorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnLibroMayorMouseClicked
+        Vista.LibroMayor vista = new LibroMayor();
+        Controlador.LibroMayorControlador ctr = new LibroMayorControlador(vista);
+        vista.setVisible(true);
+    }//GEN-LAST:event_BtnLibroMayorMouseClicked
+
+    private void BtnBalanzaGeneralMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BtnBalanzaGeneralMouseClicked
+      Vista.BalanceGeneral vista = new BalanceGeneral();
+      Controlador.BalanceGeneralControlador ctr = new BalanceGeneralControlador(vista);
+      vista.setVisible(true);
+    }//GEN-LAST:event_BtnBalanzaGeneralMouseClicked
 
     /**
      * @param args the command line arguments
