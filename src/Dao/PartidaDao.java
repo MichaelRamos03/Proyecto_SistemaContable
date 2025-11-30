@@ -174,5 +174,68 @@ public class PartidaDao {
 
         return saldo;
     }
+    
+    // -------------------------------------------------------------------------
+    // MÉTODO PARA EL BALANCE GENERAL Y BALANZA DE COMPROBACIÓN
+    // Obtiene el saldo acumulado de cada cuenta en un rango de fechas.
+    // -------------------------------------------------------------------------
+    public java.util.List<Object[]> obtenerBalanzaComprobacion(java.sql.Date desde, java.sql.Date hasta) {
+        java.util.List<Object[]> lista = new java.util.ArrayList<>();
+        
+        // SQL: Sumamos (Agrupamos) todos los movimientos por cuenta
+        String sql = "SELECT cu.codigo_cuenta, cu.nombre_cuenta, cu.tipo_cuenta, cu.naturaleza, " +
+                     "SUM(d.debe) as total_debe, SUM(d.haber) as total_haber " +
+                     "FROM asientos_detalle d " +
+                     "JOIN asientos_cabecera c ON d.id_asiento = c.id_asiento " +
+                     "JOIN cuentas_contables cu ON d.id_cuenta = cu.id_cuenta " +
+                     "WHERE c.fecha_contable BETWEEN ? AND ? " +
+                     "GROUP BY cu.codigo_cuenta, cu.nombre_cuenta, cu.tipo_cuenta, cu.naturaleza " +
+                     "ORDER BY cu.codigo_cuenta ASC";
+
+        try (java.sql.Connection con = Conexion.getConnection();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setDate(1, desde);
+            ps.setDate(2, hasta);
+            
+            java.sql.ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                String codigo = rs.getString("codigo_cuenta");
+                String nombre = rs.getString("nombre_cuenta");
+                String tipo = rs.getString("tipo_cuenta"); // ACTIVO, PASIVO, ETC.
+                String naturaleza = rs.getString("naturaleza");
+                
+                double sumaDebe = rs.getDouble("total_debe");
+                double sumaHaber = rs.getDouble("total_haber");
+                double saldoFinal = 0;
+                
+                // Lógica Contable: Calcular Saldo según Naturaleza
+                if (naturaleza.equalsIgnoreCase("DEUDORA")) {
+                    // Activos y Gastos: Saldo = Debe - Haber
+                    saldoFinal = sumaDebe - sumaHaber;
+                } else {
+                    // Pasivos, Patrimonio e Ingresos: Saldo = Haber - Debe
+                    saldoFinal = sumaHaber - sumaDebe;
+                }
+                
+                // Solo agregamos la cuenta si tiene saldo (o si tuvo movimientos)
+                // Usamos 0.001 para evitar problemas con decimales microscópicos
+                if (Math.abs(saldoFinal) > 0.001 || sumaDebe > 0 || sumaHaber > 0) {
+                    lista.add(new Object[]{
+                        codigo,      // Índice 0
+                        nombre,      // Índice 1
+                        tipo,        // Índice 2 (Vital para que el Controlador sepa dónde ponerla)
+                        saldoFinal,  // Índice 3
+                        sumaDebe,    // Índice 4 (Extra por si usas Balanza de Comprobación)
+                        sumaHaber    // Índice 5 (Extra)
+                    });
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error al consultar Balanza: " + e.getMessage());
+        }
+        return lista;
+    }
 
 }
